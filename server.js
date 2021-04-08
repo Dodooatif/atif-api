@@ -1,22 +1,78 @@
 const express=require("express")
-const post = require("./post")
+const staffs = require("./staff")
 
 const app = express()
+
+app.use(express.json());
+app.use(express.urlencoded({extended: false}));
 
 const port = 7000;
 
 app.get("/", (req,res)=>{
     res.send("welcome to my api")
 })
-app.post("/api/start", (req,res)=>{
-    res.send(post)
+
+//get all staffs
+app.get("/api/fashion", (req,res)=>{
+    res.json(staffs)
 })
-app.delete("/api/delete", (req,res)=>{
-    res.send("remove the mistake that you have made")
+
+//select a staff
+app.get("/api/fashion/:id", (req,res)=>{
+    const id = req.params.id;
+    const staff = staffs.some((s)=> s.id === id);
+
+    if (staff) {
+        res.json(staffs.filter((staff)=> staff.id === id));
+    } else {
+        res.status(404).json({message: "not found"});
+    }
 })
-app.put("/api/put", (req,res)=>{
-    res.send("thank you Mr.Awudu")
+
+//add a staff
+app.post("/api/fashion", (req,res)=>{
+    const news = {
+        name: req.body.name,
+        gender: req.body.gender,
+        email: req.body.email,
+        id: req.body.id
+    };
+    staffs.push(news);
+    res.json(staffs);
+})
+
+//delete a staff
+app.delete("/api/fashion/:id", (req,res)=>{
+
+    const id = req.params.id;
+    const staff = staffs.some((s)=> s.id === id);
+
+    if (staff) {
+        res.json({
+            msg: `Staff deleted ${id}`,
+            staffs: staffs.filter((s)=>s.id !== id)
+        })
+    }
+        
+    
+}),
+
+//update a staff
+app.put("/api/fashion/:name", (req,res)=> {
+    const staffFound = staff.some((staff)=>staff.name === req.params.name);
+    staffFound &&
+        staff.forEach((staff)=> {
+            staff.name === req.params.name &&
+            (
+            staff.name = req.body.name,
+            staff.gender = req.body.gender, 
+            staff.email = req.body.email,
+            staff.id = req.body.id
+            )
+            res.json(staffs)
+        })
+
 })
 
 
-app.listen(port, ()=>console.log(`server started ${port}`));
+app.listen(port, ()=>console.log(`server started ${port}`))
